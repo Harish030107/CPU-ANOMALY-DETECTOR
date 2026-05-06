@@ -1,0 +1,22 @@
+{
+    "name": "live",
+    "version": "1.0.0",
+    "description": "Node.js scripts converted from 4.py and 5.py",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "start:4": "node 4.js",
+        "start:5": "node 5.js",
+        "convert": "python convert_model.py",
+        "dashboard": "node server.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.18.2",
+        "ml-cart": "^2.1.1",
+        "socket.io": "^4.7.2",
+        "systeminformation": "^5.28.1"
+    }
+}

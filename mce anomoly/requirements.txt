@@ -1,0 +1,6 @@
+flask
+pandas
+joblib
+flask_cors
+influxdb
+apscheduler

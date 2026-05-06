@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CPU Usage</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 60%;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h2>CPU Usage Dashboard</h2>
+
+<table id="cpuTable">
+    <tr>
+        <th>Host</th>
+        <th>CPU Usage (%)</th>
+        <th>Time</th>
+    </tr>
+</table>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    fetch("http://localhost:5000/api/cpu/acme")
+        .then(response => response.json())
+        .then(data => {
+            console.log(data); // MUST show array
+
+            const table = document.getElementById("cpuTable");
+
+            data.forEach(item => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${item.host}</td>
+                    <td>${item.cpu_usage}</td>
+                    <td>${item.time}</td>
+                `;
+                table.appendChild(row);
+            });
+        })
+        .catch(error => console.error(error));
+});
+</script>
+
+</body>
+</html>

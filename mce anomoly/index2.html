@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CPU Anomaly Monitoring Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="index2.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="header-bg"></div>
+        <div class="header-content-wrapper">
+            <div class="header-top">
+                <div class="header-left">
+                    <div class="logo-container">
+                        <div class="logo-icon">📊</div>
+                        <div class="logo-badge">MCE Monitoring</div>
+                    </div>
+                    <div>
+                        <h1>CPU Anomaly Monitoring</h1>
+                        <p class="subtitle">Real-time infrastructure health & persistent anomaly tracking</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span class="status-text">System Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon">🖥️</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Systems Online</div>
+                        <div class="stat-value" id="total-systems">0</div>
+                    </div>
+                    <div class="stat-shine"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔴</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Systems Offline</div>
+                        <div class="stat-value" id="offline-systems">0</div>
+                    </div>
+                    <div class="stat-shine"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Live Anomalies</div>
+                        <div class="stat-value" id="live-count">0</div>
+                    </div>
+                    <div class="stat-shine"></div>
+                </div>
+                <div class="stat-card critical">
+                    <div class="stat-icon">🚨</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Persistent Issues</div>
+                        <div class="stat-value" id="persistent-count">0</div>
+                    </div>
+                    <div class="stat-shine"></div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon">✓</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Healthy Systems</div>
+                        <div class="stat-value" id="healthy-count">--</div>
+                    </div>
+                    <div class="stat-shine"></div>
+                </div>
+                <div class="stat-card"
+                    style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3);">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Normal Usage Systems</div>
+                        <div class="stat-value" id="normal-usage-count">--</div>
+                    </div>
+                    <div class="stat-shine"></div>
+                </div>
+                <div class="stat-card"
+                    style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3);">
+                    <div class="stat-icon">💤</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Low Usage Systems</div>
+                        <div class="stat-value" id="low-usage-count">0</div>
+                    </div>
+                    <div class="stat-shine"></div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-icon">🕐</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Last Updated</div>
+                        <div class="stat-value" id="last-update">now</div>
+                    </div>
+                    <div class="stat-shine"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard">
+
+        <!-- Live Anomalies -->
+        <section class="section-card">
+            <div class="section-header">
+                <div class="header-content">
+                    <h2>Live CPU Anomalies</h2>
+                    <p class="section-subtitle">Real-time detected anomalies</p>
+                </div>
+                <span class="badge badge-live">
+                    <span class="pulse-dot"></span> LIVE
+                </span>
+            </div>
+
+            <div id="live-table" class="anomaly-grid">
+                <div class="empty-state">
+                    <p>🔄 Loading data...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Persistent Anomalies -->
+        <section class="section-card section-critical">
+            <div class="section-header">
+                <div class="header-content">
+                    <h2>Persistent Anomalies (≥ 5 Minutes)</h2>
+                    <p class="section-subtitle">Sustained issues requiring attention - actively monitored</p>
+                </div>
+                <span class="badge badge-critical">
+                    <span class="pulse-dot"></span> CRITICAL
+                </span>
+            </div>
+
+            <div id="persistent-table" class="anomaly-grid">
+                <div class="empty-state">
+                    <p>✓ No persistent anomalies detected</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Low Usage Systems -->
+        <section class="section-card" style="border-color: rgba(59, 130, 246, 0.3);">
+            <div class="section-header">
+                <div class="header-content">
+                    <h2>Low Usage Systems (< 4% CPU)</h2>
+                            <p class="section-subtitle">Systems with minimal CPU activity</p>
+                </div>
+                <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6;">
+                    <span class="pulse-dot" style="background: #3b82f6;"></span> LOW
+                </span>
+            </div>
+
+            <div id="low-usage-list" class="anomaly-grid">
+                <div class="empty-state">
+                    <p>🔄 Loading low usage systems...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Online Systems -->
+        <section class="section-card">
+            <div class="section-header">
+                <div class="header-content">
+                    <h2>Online Systems</h2>
+                    <p class="section-subtitle">Systems currently reporting data</p>
+                </div>
+                <span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #22c55e;">
+                    <span class="pulse-dot" style="background: #22c55e;"></span> ACTIVE
+                </span>
+            </div>
+
+            <div id="online-systems-list" class="anomaly-grid">
+                <div class="empty-state">
+                    <p>🔄 Loading online systems...</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="chartModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">×</span>
+            <div class="modal-header">
+                <div class="modal-icon">📊</div>
+                <h3 id="modal-title"></h3>
+                <div class="live-indicator" id="live-indicator">
+                    <span class="live-indicator-dot"></span>
+                    <span>LIVE</span>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="cpuChart"></canvas>
+                <div class="chart-info" id="chart-info">
+                    <div class="chart-stat">
+                        <span class="chart-stat-label">Total Points:</span>
+                        <span class="chart-stat-value" id="total-points">0</span>
+                    </div>
+                    <div class="chart-stat">
+                        <span class="chart-stat-label">Anomalies Detected:</span>
+                        <span class="chart-stat-value anomaly-count" id="anomaly-count">0</span>
+                    </div>
+                    <div class="chart-stat">
+                        <span class="chart-stat-label">Last Updated:</span>
+                        <span class="chart-stat-value" id="chart-last-update">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="onlineSystemsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeOnlineSystemsModal()">×</span>
+            <div class="modal-header">
+                <div class="modal-icon">🖥️</div>
+                <h3>Online Systems</h3>
+            </div>
+            <div style="padding: 20px;">
+                <div id="online-systems-list" class="anomaly-grid">
+                    <div class="empty-state">
+                        <p>🔄 Loading online systems...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>MCE Monitoring System</h3>
+                <p>Advanced CPU Anomaly Detection & Real-time Monitoring</p>
+            </div>
+            <div class="footer-section">
+                <h4>Status</h4>
+                <p>🟢 All Systems Operational</p>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <p>24/7 Monitoring Active</p>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 Autointelli | Built with LK - Advanced Analytics</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS -->
+    <script>
+        // 1. Define missing API endpoints and global variables
+        const LIVE_API = "http://127.0.0.1:5000/api/anomalies";
+        const PERSISTENT_API = "http://127.0.0.1:5000/api/persistent-anomalies";
+        const HISTORY_API = "http://127.0.0.1:5000/api/history"; // Added this
+        const chart_api = "http://127.0.0.1:5000/api/recent"
+        const SYSTEM_STATUS_API = "http://127.0.0.1:5000/api/system-status";
+        const LOW_USAGE_API = "http://127.0.0.1:5000/api/low-usage";
+        let chartInstance = null; // Added this to track the Chart.js instance
+        let chartRefreshInterval = null; // Track refresh interval
+        let currentChartHost = null; // Track current host being displayed
+        let currentChartFloor = null; // Track current floor being displayed
+        let isChartLive = false; // Track if chart is in live mode
+
+        /* ================= MODAL ================= */
+        function closeModal() {
+            document.getElementById("chartModal").style.display = "none";
+            isChartLive = false;
+            currentChartHost = null;
+            currentChartFloor = null;
+
+            // Stop auto-refresh
+            if (chartRefreshInterval) {
+                clearInterval(chartRefreshInterval);
+                chartRefreshInterval = null;
+            }
+        }
+
+        function loadOnlineSystems() {
+            fetch(SYSTEM_STATUS_API)
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById("online-systems-list");
+                    container.innerHTML = "";
+
+                    const onlineSystems = data.details.filter(sys => sys.status === "ONLINE");
+
+                    if (onlineSystems.length === 0) {
+                        container.innerHTML = `<div class="empty-state"><p>✓ No systems currently online</p></div>`;
+                        return;
+                    }
+
+                    onlineSystems.forEach((sys, index) => {
+                        const card = document.createElement("div");
+                        card.className = "anomaly-card";
+                        card.style.animationDelay = `${index * 0.05}s`;
+                        card.style.cursor = "pointer";
+                        card.innerHTML = `
+                            <div class="anomaly-card-content">
+                                <div class="anomaly-header">
+                                    <span class="severity-indicator" style="background: #22c55e;"></span>
+                                    <h3>${sys.host}</h3>
+                                </div>
+                                <div class="anomaly-details">
+                                    <div class="detail-item">
+                                        <span class="label">📍 Floor</span>
+                                        <span class="value">${sys.floor_name}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">✓ Status</span>
+                                        <span class="value" style="color: #22c55e; font-weight: 600;">ONLINE</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        card.addEventListener("click", () => openChart(sys.host, sys.floor_name));
+                        container.appendChild(card);
+                    });
+                })
+                .catch(err => {
+                    console.error("Error loading online systems:", err);
+                    document.getElementById("online-systems-list").innerHTML =
+                        `<div class="empty-state"><p>⚠️ Error loading systems</p></div>`;
+                });
+        }
+
+        function loadLowUsageSystems() {
+            fetch(LOW_USAGE_API)
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById("low-usage-list");
+                    container.innerHTML = "";
+
+                    // Update count in stats
+                    document.getElementById('low-usage-count').textContent = data.length;
+
+                    if (data.length === 0) {
+                        container.innerHTML = `<div class="empty-state"><p>✓ No low usage systems</p></div>`;
+                        return;
+                    }
+
+                    data.forEach((sys, index) => {
+                        const cpuPercent = sys.cpu_usage.toFixed(2);
+                        const card = document.createElement("div");
+                        card.className = "anomaly-card";
+                        card.style.animationDelay = `${index * 0.05}s`;
+                        card.style.cursor = "pointer";
+                        card.style.borderColor = "rgba(59, 130, 246, 0.3)";
+                        card.innerHTML = `
+                            <div class="anomaly-card-content">
+                                <div class="anomaly-header">
+                                    <span class="severity-indicator" style="background: #3b82f6;"></span>
+                                    <h3>${sys.host}</h3>
+                                </div>
+                                <div class="anomaly-details">
+                                    <div class="detail-item">
+                                        <span class="label">📍 Floor</span>
+                                        <span class="value">${sys.floor_name}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">📉 CPU</span>
+                                        <div class="cpu-bar">
+                                            <div class="cpu-fill" style="width: ${Math.min(cpuPercent, 100)}%; background: #3b82f6"></div>
+                                        </div>
+                                        <span class="value" style="color: #3b82f6;">${cpuPercent}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        card.addEventListener("click", () => openChart(sys.host, sys.floor_name));
+                        container.appendChild(card);
+                    });
+                })
+                .catch(err => {
+                    console.error("Error loading low usage systems:", err);
+                    document.getElementById("low-usage-list").innerHTML =
+                        `<div class="empty-state"><p>⚠️ Error loading systems</p></div>`;
+                });
+        }
+
+        /* ================= OPEN GRAPH ================= */
+        function openChart(host, floor) {
+            console.log("Opening chart for:", host, floor);
+
+            currentChartHost = host;
+            currentChartFloor = floor;
+            isChartLive = true;
+
+            document.getElementById("modal-title").innerText =
+                `${host} (${floor}) - Last 15 Minutes`;
+
+            document.getElementById("chartModal").style.display = "block";
+
+            // Initial load
+            loadChartData(host, floor);
+
+            // Clear any existing interval
+            if (chartRefreshInterval) {
+                clearInterval(chartRefreshInterval);
+            }
+
+            // Auto-refresh every 1 second for real-time updates
+            chartRefreshInterval = setInterval(() => {
+                if (isChartLive) {
+                    loadChartData(host, floor, true);
+                }
+            }, 1000);
+        }
+
+        /* ================= LOAD CHART DATA ================= */
+        function loadChartData(host, floor, isUpdate = false) {
+
+            fetch(chart_api, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    host: host,
+                    floor: floor
+                })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("API error");
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        if (!isUpdate) {
+                            alert("No CPU history available for this host.");
+                            closeModal();
+                        }
+                        return;
+                    }
+
+                    const labels = data.map(d => {
+                        const date = new Date(d.time);
+                        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    });
+
+                    const cpuValues = data.map(d => d.cpu_usage);
+                    const pointColors = data.map(d =>
+                        d.anomaly ? "#ef4444" : "#22c55e"
+                    );
+
+                    // Count anomalies
+                    const anomalyCount = data.filter(d => d.anomaly).length;
+
+                    // Update chart stats
+                    document.getElementById('total-points').textContent = data.length;
+                    document.getElementById('anomaly-count').textContent = anomalyCount;
+                    document.getElementById('chart-last-update').textContent = new Date().toLocaleTimeString();
+
+                    // If chart exists and we're updating, just update the data
+                    if (chartInstance && isUpdate) {
+                        chartInstance.data.labels = labels;
+                        chartInstance.data.datasets[0].data = cpuValues;
+                        chartInstance.data.datasets[0].pointBackgroundColor = pointColors;
+                        chartInstance.data.datasets[0].pointHoverBackgroundColor = pointColors;
+
+                        // Store the data for the anomaly line plugin
+                        chartInstance.config.data.anomalyData = data;
+
+                        chartInstance.update('active'); // Use 'active' mode for smooth updates
+
+                        // Animate live indicator to show update
+                        const liveIndicator = document.getElementById('live-indicator');
+                        if (liveIndicator) {
+                            liveIndicator.style.transform = 'scale(1.1)';
+                            setTimeout(() => {
+                                liveIndicator.style.transform = 'scale(1)';
+                            }, 200);
+                        }
+
+                        console.log(`Chart updated at ${new Date().toLocaleTimeString()} - ${data.length} points`);
+                        return;
+                    }
+
+                    const ctx = document.getElementById("cpuChart").getContext("2d");
+
+                    if (chartInstance) {
+                        chartInstance.destroy();
+                    }
+
+                    // Custom plugin to draw red vertical lines at anomaly points
+                    const anomalyLinePlugin = {
+                        id: 'anomalyLines',
+                        beforeDraw: (chart) => {
+                            const { ctx, chartArea, scales } = chart;
+                            if (!chartArea) return;
+
+                            const dataset = chart.data.datasets[0];
+                            const xScale = scales.x;
+                            const yScale = scales.y;
+
+                            // Get the anomaly data from chart config or use the current data
+                            const anomalyData = chart.config.data.anomalyData || data;
+
+                            ctx.save();
+                            anomalyData.forEach((point, index) => {
+                                if (point.anomaly) {
+                                    const x = xScale.getPixelForValue(index);
+
+                                    // Draw red background highlight (wider and more visible)
+                                    ctx.fillStyle = 'rgba(239, 68, 68, 0.12)';
+                                    ctx.fillRect(x - 15, chartArea.top, 30, chartArea.bottom - chartArea.top);
+
+                                    // Draw vertical line (thicker and brighter)
+                                    ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)';
+                                    ctx.lineWidth = 3;
+                                    ctx.setLineDash([8, 4]);
+                                    ctx.beginPath();
+                                    ctx.moveTo(x, chartArea.top);
+                                    ctx.lineTo(x, chartArea.bottom);
+                                    ctx.stroke();
+                                    ctx.setLineDash([]);
+
+                                    // Add anomaly label at top
+                                    ctx.fillStyle = '#ef4444';
+                                    ctx.font = 'bold 10px Inter';
+                                    ctx.textAlign = 'center';
+                                    ctx.fillText('⚠', x, chartArea.top + 15);
+                                }
+                            });
+                            ctx.restore();
+                        }
+                    };
+
+                    chartInstance = new Chart(ctx, {
+                        type: "line",
+                        data: {
+                            labels: labels,
+                            anomalyData: data, // Store for plugin access
+                            datasets: [{
+                                label: "CPU Usage %",
+                                data: cpuValues,
+                                borderColor: "#38bdf8",
+                                backgroundColor: function (context) {
+                                    const chart = context.chart;
+                                    const { ctx, chartArea } = chart;
+                                    if (!chartArea) return 'rgba(56, 189, 248, 0.1)';
+                                    const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                                    gradient.addColorStop(0, 'rgba(56, 189, 248, 0.05)');
+                                    gradient.addColorStop(0.5, 'rgba(56, 189, 248, 0.15)');
+                                    gradient.addColorStop(1, 'rgba(56, 189, 248, 0.3)');
+                                    return gradient;
+                                },
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true,
+                                pointBackgroundColor: pointColors,
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointRadius: function (context) {
+                                    // Make anomaly points larger
+                                    return pointColors[context.dataIndex] === '#ef4444' ? 7 : 5;
+                                },
+                                pointHoverRadius: function (context) {
+                                    return pointColors[context.dataIndex] === '#ef4444' ? 9 : 7;
+                                },
+                                pointHoverBorderWidth: 3,
+                                pointHoverBackgroundColor: pointColors,
+                                pointHoverBorderColor: '#fff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            animation: {
+                                duration: 750,
+                                easing: 'easeInOutQuart',
+                                onComplete: function () {
+                                    // Chart loaded successfully
+                                }
+                            },
+                            transitions: {
+                                active: {
+                                    animation: {
+                                        duration: 300
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    grid: {
+                                        color: "rgba(148, 163, 184, 0.1)",
+                                        drawBorder: false,
+                                        lineWidth: 1
+                                    },
+                                    border: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        color: "#94a3b8",
+                                        font: {
+                                            size: 12,
+                                            weight: 500
+                                        },
+                                        padding: 10,
+                                        callback: function (value) {
+                                            return value + '%';
+                                        }
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'CPU Usage (%)',
+                                        color: '#e5e7eb',
+                                        font: {
+                                            size: 14,
+                                            weight: 600
+                                        },
+                                        padding: 15
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false,
+                                        drawBorder: false
+                                    },
+                                    border: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        color: "#94a3b8",
+                                        font: {
+                                            size: 11,
+                                            weight: 500
+                                        },
+                                        maxRotation: 45,
+                                        minRotation: 45,
+                                        padding: 10
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Time',
+                                        color: '#e5e7eb',
+                                        font: {
+                                            size: 14,
+                                            weight: 600
+                                        },
+                                        padding: 15
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    align: 'end',
+                                    labels: {
+                                        color: "#f1f5f9",
+                                        font: {
+                                            size: 13,
+                                            weight: 600
+                                        },
+                                        padding: 15,
+                                        usePointStyle: true,
+                                        pointStyle: 'circle'
+                                    }
+                                },
+                                tooltip: {
+                                    enabled: true,
+                                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                                    titleColor: '#38bdf8',
+                                    bodyColor: '#e5e7eb',
+                                    borderColor: 'rgba(56, 189, 248, 0.3)',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    displayColors: true,
+                                    titleFont: {
+                                        size: 13,
+                                        weight: 600
+                                    },
+                                    bodyFont: {
+                                        size: 12,
+                                        weight: 500
+                                    },
+                                    callbacks: {
+                                        label: function (context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            label += context.parsed.y.toFixed(2) + '%';
+                                            const isAnomaly = pointColors[context.dataIndex] === '#ef4444';
+                                            if (isAnomaly) {
+                                                label += ' ⚠️ Anomaly';
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        plugins: [anomalyLinePlugin]
+                    });
+                })
+                .catch(err => {
+                    console.error("Chart error:", err);
+                    alert("Failed to load CPU history. Make sure the API is running.");
+                    closeModal();
+                });
+        }
+        /* ================= DATA LOADING ================= */
+
+        function updateStatsCounts() {
+            let onlineCount = 0;
+            let liveAnomalyCount = 0;
+            let lowUsageCount = 0;
+
+            // Fetch live anomalies count
+            fetch(LIVE_API)
+                .then(res => res.json())
+                .then(data => {
+                    liveAnomalyCount = data.length;
+                    document.getElementById('live-count').textContent = liveAnomalyCount;
+                    updateNormalUsageCount(onlineCount, liveAnomalyCount, lowUsageCount);
+                })
+                .catch(err => console.error("Live anomalies error:", err));
+
+            // Fetch persistent anomalies count
+            fetch(PERSISTENT_API)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('persistent-count').textContent = data.length;
+                })
+                .catch(err => console.error("Persistent anomalies error:", err));
+
+            // Fetch low usage count
+            fetch(LOW_USAGE_API)
+                .then(res => res.json())
+                .then(data => {
+                    lowUsageCount = data.length;
+                    document.getElementById('low-usage-count').textContent = lowUsageCount;
+                    updateNormalUsageCount(onlineCount, liveAnomalyCount, lowUsageCount);
+                })
+                .catch(err => console.error("Low usage error:", err));
+
+            // Fetch system status and update all counts
+            fetch(SYSTEM_STATUS_API)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error("Failed to fetch system status");
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    onlineCount = data.online ?? 0;
+                    const offlineCount = data.offline ?? 0;
+                    const totalSystems = data.total ?? 0;
+
+                    // Update online systems
+                    document.getElementById('total-systems').textContent = onlineCount;
+
+                    // Update offline systems
+                    document.getElementById('offline-systems').textContent = offlineCount;
+
+                    // Calculate healthy systems (online but not in live anomalies)
+                    fetch(LIVE_API)
+                        .then(res => res.json())
+                        .then(anomalyData => {
+                            liveAnomalyCount = anomalyData.length;
+                            const healthySystems = onlineCount - liveAnomalyCount;
+                            document.getElementById('healthy-count').textContent = healthySystems >= 0 ? healthySystems : 0;
+                            updateNormalUsageCount(onlineCount, liveAnomalyCount, lowUsageCount);
+                        })
+                        .catch(err => {
+                            // If we can't get anomaly count, assume all online are healthy
+                            document.getElementById('healthy-count').textContent = onlineCount;
+                        });
+                })
+                .catch(err => {
+                    console.error("System status error:", err);
+                });
+
+            // Update last update timestamp
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        }
+
+        function updateNormalUsageCount(online, anomalies, lowUsage) {
+            // Normal usage = Online - Anomalies - Low Usage
+            const normalUsage = online - anomalies - lowUsage;
+            if (online > 0) {
+                document.getElementById('normal-usage-count').textContent = normalUsage >= 0 ? normalUsage : 0;
+            }
+        }
+
+
+        function loadLiveAnomalies() {
+            fetch(LIVE_API)
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById("live-table");
+                    container.innerHTML = "";
+
+                    if (data.length === 0) {
+                        container.innerHTML = `<div class="empty-state"><p>✓ No anomalies detected</p></div>`;
+                        return;
+                    }
+
+                    data.forEach((row, index) => {
+                        const cpuPercent = row.cpu_usage.toFixed(2);
+                        const severity = cpuPercent > 90 ? 'critical' : cpuPercent > 75 ? 'warning' : 'normal';
+
+                        const card = document.createElement("div");
+                        card.className = `anomaly-card ${severity}`;
+                        card.style.animationDelay = `${index * 0.05}s`;
+                        card.innerHTML = `
+                    <div class="anomaly-card-content">
+                        <div class="anomaly-header">
+                            <span class="severity-indicator ${severity}"></span>
+                            <h3>${row.host}</h3>
+                        </div>
+                        <div class="anomaly-details">
+                            <div class="detail-item">
+                                <span class="label">📍 Floor</span>
+                                <span class="value">${row.floor_name}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">📈 CPU</span>
+                                <div class="cpu-bar">
+                                    <div class="cpu-fill" style="width: ${Math.min(cpuPercent, 100)}%; background: ${cpuPercent > 90 ? '#ef4444' : '#facc15'}"></div>
+                                </div>
+                                <span class="value">${cpuPercent}%</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                        // Click event to open the chart
+                        card.addEventListener("click", () => openChart(row.host, row.floor_name));
+                        container.appendChild(card);
+                    });
+                });
+        }
+
+        function loadPersistentAnomalies() {
+            fetch(PERSISTENT_API)
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById("persistent-table");
+                    container.innerHTML = "";
+
+                    if (data.length === 0) {
+                        container.innerHTML = `<div class="empty-state"><p>✓ No persistent anomalies</p></div>`;
+                        return;
+                    }
+
+                    data.forEach((row, index) => {
+                        const cpuPercent = row.cpu_usage ? row.cpu_usage.toFixed(2) : 'N/A';
+                        const severity = cpuPercent !== 'N/A' && cpuPercent > 90 ? 'critical' : 'critical';
+
+                        const card = document.createElement("div");
+                        card.className = `anomaly-card ${severity}`;
+                        card.style.animationDelay = `${index * 0.05}s`;
+                        card.innerHTML = `
+                    <div class="anomaly-card-content">
+                        <div class="anomaly-header">
+                            <span class="severity-indicator critical"></span>
+                            <h3>${row.host}</h3>
+                        </div>
+                        <div class="anomaly-details">
+                            <div class="detail-item">
+                                <span class="label">📍 Floor</span>
+                                <span class="value">${row.floor_name}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">📈 CPU</span>
+                                <div class="cpu-bar">
+                                    <div class="cpu-fill" style="width: ${cpuPercent !== 'N/A' ? Math.min(cpuPercent, 100) : 0}%; background: #ef4444"></div>
+                                </div>
+                                <span class="value">${cpuPercent}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">⏱️ Duration</span>
+                                <span class="value duration-badge">${row.duration_minutes} min</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                        card.addEventListener("click", () => openChart(row.host, row.floor_name));
+                        container.appendChild(card);
+                    });
+                });
+        }
+
+        // Initialize
+        loadLiveAnomalies();
+        loadPersistentAnomalies();
+        loadOnlineSystems();
+        loadLowUsageSystems();
+        updateStatsCounts();
+
+
+        // Intervals - Optimized for performance and real-time updates
+        setInterval(loadLiveAnomalies, 10000);       // Every 10 seconds - catch new anomalies quickly
+        setInterval(loadPersistentAnomalies, 15000); // Every 15 seconds - slower changing data
+        setInterval(loadOnlineSystems, 20000);       // Every 20 seconds - online systems update
+        setInterval(loadLowUsageSystems, 20000);     // Every 20 seconds - low usage systems update
+        setInterval(updateStatsCounts, 10000);       // Every 10 seconds - keep stats current
+    </script>
+</body>
+
+</html>

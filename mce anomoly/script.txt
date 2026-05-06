@@ -1,0 +1,60 @@
+const LIVE_API = "http://127.0.0.1:5000/api/anomalies";
+const PERSISTENT_API = "http://127.0.0.1:5000/api/persistent-anomalies";
+
+function loadLiveAnomalies() {
+    fetch(LIVE_API)
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById("live-table");
+            tbody.innerHTML = "";
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="empty">No live anomalies</td></tr>`;
+                return;
+            }
+
+            data.forEach(row => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${row.host}</td>
+                    <td>${row.floor_name}</td>
+                    <td class="cpu-high">${row.cpu_usage.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+function loadPersistentAnomalies() {
+    fetch(PERSISTENT_API)
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById("persistent-table");
+            tbody.innerHTML = "";
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="empty">No persistent anomalies</td></tr>`;
+                return;
+            }
+
+            data.forEach(row => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${row.host}</td>
+                    <td>${row.floor_name}</td>
+                    <td class="cpu-high">${row.cpu_usage.toFixed(2)}</td>
+                    <td>${row.duration_minutes} min</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+/* Auto refresh every 30 seconds */
+loadLiveAnomalies();
+loadPersistentAnomalies();
+
+setInterval(() => {
+    loadLiveAnomalies();
+    loadPersistentAnomalies();
+}, 30000);
